@@ -18,6 +18,7 @@ class BL_EXP:
     cwd = os.path.abspath(".")
     exp_triplets = []
     one_hypo_per_bl = True
+    last = "awl.n.01"
 
     def __init__(self, identifier, cwd, is_load = False):
         self.id = identifier
@@ -26,7 +27,7 @@ class BL_EXP:
                 self.df = pd.read_csv(os.path.join(cwd, self.id+".csv"))
             except:
                 raise Exception("This is not a valid project folder")
-            self.cwd = os.path.join(cwd, self.pre+self.id)
+            self.cwd = cwd
 
         elif os.path.isdir(os.path.join(cwd, self.pre+self.id)):
             self.cwd = os.path.join(cwd, self.pre+self.id)
@@ -36,6 +37,12 @@ class BL_EXP:
             self.cwd = os.path.join(cwd, self.pre+self.id)
             os.mkdir(self.cwd)
         return None
+
+    def add_hypo(self, hypo):
+        ind = self.get_bl_index(self.last)
+        self.df.at[ind,'hyponym'] = hypo
+        self.df.at[ind,'hyponym_def'] = wn.synset(hypo).definition()
+        return True
 
     def initial_load(self, BLlist_filepath):
         ret = False
@@ -50,8 +57,9 @@ class BL_EXP:
     def create_new_df(self, bl_list):
         l = len(bl_list.index)
         empty_col = ['missing' for i in range(l)]
-        cols = {"hypernym":empty_col, 
-                "bl":bl_list.get('synset').tolist(), 
+        cols = {"hypernym":bl_list.get('hyper').tolist(), 
+                "bl":bl_list.get('synset').tolist(),
+                "bl_name":empty_col,
                 "bl_certainty":bl_list.get('bl_certain').tolist(), 
                 "hyponym":empty_col, 
                 "hypernym_def":empty_col, 
@@ -60,9 +68,21 @@ class BL_EXP:
                 "hyponym_img":empty_col}
         try:
             self.df = pd.DataFrame(data=cols).astype('string')
-            print(self.df.head)
+            print(self.df)
+            self.fill_df_generic()
         except:
             raise Exception('Dataframe creation failed.')
+        return True
+
+    def fill_df_generic(self):
+        self.last = self.df.at[0,'bl']
+        for i in range(len(self.df)):
+            bl = self.df.at[i,'bl']
+            syn = wn.synset(bl)
+            name = syn.lemma_names()[0]
+            bldef = syn.definition()
+            self.df.at[i,'bl_name'] = name
+            self.df.at[i,'bl_def'] = bldef
         return True
 
     def store(self):
@@ -75,17 +95,30 @@ class BL_EXP:
         return table
 
     def next(self):
-        index = 2
-        return index
+        last_index = self.get_bl_index(self.last)
+        index = last_index+1
+        self.last = self.df["bl"][index]
+        return self.last
 
-    def get_bl_info(self, tobe_annotated):
-        row = self.df.iloc[[tobe_annotated]].to_dict()
-        print(row)
-        hyper = row['hypernym'][2]
-        bl = row['bl'][2]
-        bl_def = row['bl_def'][2]
-        syns = wn.synset(bl).lemmas()
-        return [hyper,bl,bl_def,syns]
+    def get_def_info(self):
+        index = self.get_bl_index(self.last)
+        row = self.df.iloc[[index]].to_dict()
+        hyper = list(row.get('hypernym').values())[0]
+        bl_name = list(row.get('bl_name').values())[0]
+        bl_syn = list(row.get('bl').values())[0]
+        bl_def = list(row.get('bl_def').values())[0]
+        syns = wn.synset(bl_syn).lemma_names()
+        self.last = bl_syn
+        return [hyper,bl_syn,bl_def,syns,bl_name]
+
+    def get_hypo_info(self):
+        index = self.get_bl_index(self.last)
+        row = self.df.iloc[[index]].to_dict()
+        hypo = list(row.get('hyponym').values())[0]
+        hypodef = list(row.get('hyponym_def').values())[0]
+        print(hypo)
+        syns = wn.synset(hypo).lemma_names()
+        return [hypo, syns, hypodef]
 
     def get_children(self, name):
         syn = get_synset(name)
@@ -95,8 +128,18 @@ class BL_EXP:
 
     def get_tree(self, root):
         tree = wn.synset(root).tree(lambda s:s.hyponyms())
-        print(tree)
         return tree
+
+    def get_bl_index(self, name):
+        index = self.df.index[self.df['bl']==name].tolist()[0]
+        return index
+
+    def remove(self, bl_name):
+        index = self.get_bl_index(bl_name)
+        self.df = self.df.drop([index])
+        self.last = self.df["bl"][index+1]
+        print(self.last)
+        return True
 
 #=============================================================================
 # Functions

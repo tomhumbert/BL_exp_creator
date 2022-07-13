@@ -2,7 +2,7 @@ from nltk.corpus import wordnet as wn
 import pandas as pd
 import numpy as np
 from colorama import Fore, Back, Style
-import sys, os, re
+import sys, os, shutil
 
 #=============================================================================
 # Classes
@@ -18,7 +18,7 @@ class BL_EXP:
     cwd = os.path.abspath(".")
     exp_triplets = []
     one_hypo_per_bl = True
-    last = "awl.n.01"
+    last = ""
 
     def __init__(self, identifier, cwd, is_load = False):
         self.id = identifier
@@ -28,14 +28,19 @@ class BL_EXP:
             except:
                 raise Exception("This is not a valid project folder")
             self.cwd = cwd
+            self.last = self.get_last_stored_pos()
 
         elif os.path.isdir(os.path.join(cwd, self.pre+self.id)):
             self.cwd = os.path.join(cwd, self.pre+self.id)
             self.df = pd.read_csv(os.path.join(self.cwd, self.id+".csv"))
+            self.last = self.get_last_stored_pos()
 
         else:
             self.cwd = os.path.join(cwd, self.pre+self.id)
             os.mkdir(self.cwd)
+            imgs_path = os.path.join(self.cwd, 'images')
+            os.mkdir(imgs_path)
+            shutil.copy(os.path.join(os.path.curdir,'x.png'), imgs_path)
         return None
 
     def add_hypo(self, hypo):
@@ -44,11 +49,17 @@ class BL_EXP:
         self.df.at[ind,'hyponym_def'] = wn.synset(hypo).definition()
         return True
 
+    def add_img(self, img):
+        ind = self.get_bl_index(self.last)
+        self.df.at[ind,'hyponym_img'] = img
+        return True
+
     def initial_load(self, BLlist_filepath):
         ret = False
         input = pd.read_csv(BLlist_filepath)
         if  self.create_new_df(input):
             self.store()
+            self.last = self.get_last_stored_pos()
             ret =  True
         else:
             raise Exception("The initial dataframe creation failed")
@@ -57,6 +68,9 @@ class BL_EXP:
     def create_new_df(self, bl_list):
         l = len(bl_list.index)
         empty_col = ['missing' for i in range(l)]
+        empty_img_col = ['x.png' for i in range(l)]
+        cont_col = [False for i in range(l)]
+        cont_col[0] = True
         cols = {"hypernym":bl_list.get('hyper').tolist(), 
                 "bl":bl_list.get('synset').tolist(),
                 "bl_name":empty_col,
@@ -65,17 +79,18 @@ class BL_EXP:
                 "hypernym_def":empty_col, 
                 "bl_def":empty_col, 
                 "hyponym_def":empty_col, 
-                "hyponym_img":empty_col}
+                "hyponym_img":empty_img_col,
+                "cont_flag":cont_col}
         try:
             self.df = pd.DataFrame(data=cols).astype('string')
             print(self.df)
             self.fill_df_generic()
+            self.set_last_stored_pos(0)
         except:
             raise Exception('Dataframe creation failed.')
         return True
 
     def fill_df_generic(self):
-        self.last = self.df.at[0,'bl']
         for i in range(len(self.df)):
             bl = self.df.at[i,'bl']
             syn = wn.synset(bl)
@@ -97,7 +112,7 @@ class BL_EXP:
     def next(self):
         last_index = self.get_bl_index(self.last)
         index = last_index+1
-        self.last = self.df["bl"][index]
+        self.last = self.set_last_stored_pos(index)
         return self.last
 
     def get_def_info(self):
@@ -108,8 +123,16 @@ class BL_EXP:
         bl_syn = list(row.get('bl').values())[0]
         bl_def = list(row.get('bl_def').values())[0]
         syns = wn.synset(bl_syn).lemma_names()
-        self.last = bl_syn
-        return [hyper,bl_syn,bl_def,syns,bl_name]
+        hypo = list(row.get('hyponym').values())[0]
+        hypo_img = list(row.get('hyponym_img').values())[0]
+        certainty = list(row.get('bl_certainty').values())[0]
+        try:
+            hypo_syns = wn.synset(hypo).lemma_names()
+            hypo_def = wn.synset(hypo).definition()
+        except:
+            hypo_syns = ['missing']
+            hypo_def = "missing"
+        return [hyper,bl_syn,bl_def,syns,bl_name, hypo, hypo_img, hypo_syns, hypo_def, certainty]
 
     def get_hypo_info(self):
         index = self.get_bl_index(self.last)
@@ -131,15 +154,27 @@ class BL_EXP:
         return tree
 
     def get_bl_index(self, name):
+        print(self.last, self.df.index[self.df['bl']==name])
         index = self.df.index[self.df['bl']==name].tolist()[0]
         return index
 
     def remove(self, bl_name):
         index = self.get_bl_index(bl_name)
+        self.set_last_stored_pos(index+1)
         self.df = self.df.drop([index])
-        self.last = self.df["bl"][index+1]
-        print(self.last)
         return True
+
+    def get_last_stored_pos(self):
+        index = self.df.index[self.df['cont_flag']==True].tolist()[0]
+        self.last = self.df["bl"][index]
+        return self.last
+
+    def set_last_stored_pos(self, ind):
+        old_i = self.get_bl_index(self.get_last_stored_pos())
+        self.df["cont_flag"][old_i] = False
+        self.df["cont_flag"][ind] = True
+        self.last = self.df["bl"][ind]
+        return self.last
 
 #=============================================================================
 # Functions

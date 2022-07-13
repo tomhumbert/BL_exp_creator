@@ -3,17 +3,11 @@ from sqlite3 import enable_callback_tracebacks
 import PySimpleGUI as sg
 import hypo_hyper_finder as hh
 import tasklist_creator as tc
-import os
+import os, shutil
 
 # ------ Menu Definition ------ #      
 menu_def = [['File', ['New Experiment', 'Open Experiment', 'Save + Exit', 'Exit']],      
                 ['View', ['Overview', 'Other view', 'About']] ]      
-
-def check_savefile():
-    return False
-
-def load_rows():
-    return rows
 
 def small_text(text):
     return sg.Text(text,  
@@ -82,32 +76,33 @@ def big_text(text, key=None):
                     auto_size_text=True,
                     k=key )
 
-def make_defbox(hyper,bl,synonyms, bl_def):
+def make_defbox(hyper,bl,synonyms, bl_def, hypo, hypo_syns, hypo_def, cert):
     hyper_layout = [
         [small_text(hyper)]
     ]
     bl_layout = [
         [big_text(bl)],
+        [small_text("Expert annotator agreement:")],
+        [med_text(f"Full agreement: {cert}")],
         [small_text("Synonyms:")],
         [med_text(synonyms)],
         [small_text("Definition:")],
         [med_text(bl_def)]
     ]
     hypo_layout = [
-        [big_text("<Hyponym>", key='hypo')],
+        [big_text(hypo, key='hypo')],
         [small_text("Synonyms:")],
-        [med_text("<Synonyms>", key='hypo_syns')],
+        [med_text(hypo_syns, key='hypo_syns')],
         [small_text("Definition:")],
-        [med_text("<Definition>", key="hypo_def")]
+        [med_text(hypo_def, key="hypo_def")]
     ]
 
-
     hyperbox = sg.Frame("Hypernym", hyper_layout, font='Courier 12',expand_x=True, k='hyperbox',p=5,relief='sunken')
+    blbox = False
     blbox = sg.Frame("Basic Level", bl_layout, font='Courier 12',  expand_y=True,expand_x=True, k='blbox',p=5,relief='sunken')
     hypobox = sg.Frame("Selected Hyponym", hypo_layout, font='Courier 12', expand_y=True,expand_x=True, k='hypobox',p=5,relief='sunken')
     defbox = sg.Column([[hyperbox],[blbox],[hypobox],[sg.Sizer(300,1)]], expand_y=True, expand_x=True)
     return defbox
-
 
 
 def make_tree(tree, tree_data, root, i):
@@ -145,8 +140,8 @@ def make_treebox(tree_data):
 
 def make_actionbox():
     box_layout = [
-        [sg.Input(default_text="Select an image for the chosen hyponym", expand_x=True, p=2, k="dir", enable_events=True),sg.Button('Browse', key='browse', p=2)],
-        [sg.Button('Continue', p=5), sg.Button('Save + Exit', p=5),sg.Button('Remove', p=5)]
+        [sg.Button('Select Image', key='select_img', p=5), sg.Button('Continue', p=5)],
+        [sg.Button('Save + Exit', p=5),sg.Button('Remove', p=5)]
     ]
     actbox = sg.Frame('Image + Actions', box_layout, font='Courier 12',  size=(500,100), expand_x=True,p=5)
     return actbox
@@ -176,18 +171,19 @@ def goto_overview(window, project):
 def goto_annotate(window, project):
     #index number of next item to be annotated
     info = project.get_def_info()
-    hyper,bl_syn,bl_def,syns,bl_name = str(info[0]),str(info[1]),str(info[2]),str(info[3]), str(info[4])
+    hyper,bl_syn,bl_def,syns,bl_name, hypo, hypo_img, hypo_syns, hypo_def, certainty = str(info[0]),str(info[1]),str(info[2]),str(info[3]), str(info[4]), str(info[5]), str(info[6]), str(info[7]), str(info[8]), str(info[9])
     treedata = project.get_tree(bl_syn)
 
-    defbox = make_defbox(hyper,bl_name,syns,bl_def)
+    img = os.path.join(project.cwd, "images", hypo_img)
+    defbox = make_defbox(hyper,bl_name,syns,bl_def, hypo, hypo_syns, hypo_def, certainty)
     treebox, tree = make_treebox(treedata)
     actbox = make_actionbox()
     layout = [
         [sg.Menu(menu_def, key='menu')],
-        [defbox, sg.Column([[treebox], [sg.Image("./x.png",subsample=8,s=(100,100)),actbox],[sg.Sizer(400,1)]], expand_y=True, expand_x=True, justification='right')]
+        [defbox, sg.Column([[treebox], [sg.Image(img,subsample=4,s=(100,100)),actbox],[sg.Sizer(400,1)]], expand_y=True, expand_x=True, justification='right')]
     ]
     window.close()
-    new_window = sg.Window("BLEXP Creator Annotator", layout, default_element_size=(12, 1),auto_size_text=False, auto_size_buttons=False, default_button_element_size=(12, 1),size =(800,600), finalize=True, resizable=True)
+    new_window = sg.Window("BLEXP Creator Annotator", layout, default_element_size=(12, 1),auto_size_text=False, auto_size_buttons=False, default_button_element_size=(12, 1),size =(1000,600), finalize=True, resizable=True)
     new_window.force_focus()
     return new_window, tree
 
@@ -226,6 +222,17 @@ def main():
         # ------ Process menu choices ------ #     
         if event == 'About':      
             sg.popup('Version 1.0', 'Made by Tom Humbert at VU Amsterdam', title='About this program')  
+
+        elif event == "table":
+            index = values["table"][0]
+
+        elif event == "Edit":
+            try:
+                index = values["table"][0]
+                project.set_last_stored_pos(index)
+                window, current_hypo_tree = goto_annotate(window, project)
+            except:
+                sg.PopupAnnoying("Select a row first!")
 
         elif type(event) == sg.TreeData:
             key = list(values.keys())[1]
@@ -277,6 +284,15 @@ def main():
         elif event == "o_cont":
             window, current_hypo_tree = goto_annotate(window, project)
             #print(current_hypo_tree)
+
+        elif event == 'select_img':
+            img_name = project.get_hypo_info()[0] + ".png"
+            img_src = sg.popup_get_file("Select the image file.","Image Selection",project.cwd, "png")
+            if len(img_src) > 0:
+                img_dest = os.path.join(project.cwd, "images", img_name)
+                shutil.copy(img_src, img_dest)
+                project.add_img(img_name)
+            window.refresh()
 
         elif event == "Remove":
             project.remove(project.last)

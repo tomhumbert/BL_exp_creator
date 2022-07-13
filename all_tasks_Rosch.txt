@@ -1,0 +1,109 @@
+#-image-----------------label-----------------------condition (image, label, level, cond.)----------------------correct_response-
+windsor_chair           "Furniture"                 "windsor_chair      furniture           hypernym    True"   1
+floor_lamp              "Furniture"                 "floor_lamp         furniture           hypernym    True"   1
+kitchen_table           "Furniture"                 "kitchen_table      furniture           hypernym    True"   1
+sedan                   "Vehicle"                   "sedan              vehicle             hypernym    True"   1
+trailer_truck           "Vehicle"                   "trailer_truck      vehicle             hypernym    True"   1
+minibus                 "Vehicle"                   "minibus            vehicle             hypernym    True"   1
+sweat_pants             "Clothing"                  "sweat_pants        clothing            hypernym    True"   1
+knee_high               "Clothing"                  "knee_high          clothing            hypernym    True"   1
+dress_shirt             "Clothing"                  "dress_shirt        clothing            hypernym    True"   1
+delicious_apple         "Fruit"                     "delicious_apple    fruit               hypernym    True"   1
+cling_peach             "Fruit"                     "cling_peach        fruit               hypernym    True"   1
+thompson_seedless       "Fruit"                     "thompson_seedless  fruit               hypernym    True"   1
+claw_hammer             "Handtool"                  "claw_hammer        handtool            hypernym    True"   1
+crosscut_saw            "Handtool"                  "crosscut_saw       handtool            hypernym    True"   1
+phillips_screwdriver    "Handtool"                  "phillips_screwdriver  handtool         hypernym    True"   1
+accoustic_guitar        "Musical Instrument"        "accoustic_guitar   musical_instrument  hypernym    True"   1
+grand_piano             "Musical Instrument"        "grand_piano        musical_instrument  hypernym    True"   1
+bass_drum               "Musical Instrument"        "bass_drum          musical_instrument  hypernym    True"   1
+floor_lamp              "Fruit"                     "floor_lamp         furniture           hypernym    False"  2
+windsor_chair           "Clothing"                  "windsor_chair      furniture           hypernym    False"  2
+kitchen_table           "Handtool"                  "kitchen_table      furniture           hypernym    False"  2
+sedan                   "Furniture"                 "sedan              vehicle             hypernym    False"  2
+minibus                 "Clothing"                  "minibus            vehicle             hypernym    False"  2
+trailer_truck           "Handtool"                  "trailer_truck      vehicle             hypernym    False"  2
+sweat_pants             "Vehicle"                   "sweat_pants        clothing            hypernym    False"  2
+knee_high               "Fruit"                     "knee_high          clothing            hypernym    False"  2
+dress_shirt             "Musical Instrument"        "dress_shirt        clothing            hypernym    False"  2
+delicious_apple         "Furniture"                 "delicious_apple    fruit               hypernym    False"  2
+cling_peach             "Vehicle"                   "cling_peach        fruit               hypernym    False"  2
+thompson_seedless       "Musical Instrument"        "thompson_seedless  fruit               hypernym    False"  2
+claw_hammer             "Vehicle"                   "claw_hammer        handtool            hypernym    False"  2
+crosscut_saw            "Furniture"                 "crosscut_saw       handtool            hypernym    False"  2
+phillips_screwdriver    "Musical Instrument"        "phillips_screwdriver handtool          hypernym    False"  2
+accoustic_guitar        "Handtool"                  "accoustic_guitar   musical_instrument  hypernym    False"  2
+grand_piano             "Clothing"                  "grand_piano        musical_instrument  hypernym    False"  2
+bass_drum               "Fruit"                     "bass_drum          musical_instrument  hypernym    False"  2
+windsor_chair           "Chair"                     "windsor_chair      chair               bl          True"   1
+floor_lamp              "Lamp"                      "floor_lamp         lamp                bl          True"   1
+kitchen_table           "Table"                     "kitchen_table      table               bl          True"   1
+sedan                   "Car"                       "sedan              car                 bl          True"   1
+minibus                 "Bus"                       "minibus            bus                 bl          True"   1
+trailer_truck           "Truck"                     "trailer_truck      truck               bl          True"   1
+sweat_pants             "Pants"                     "sweat_pants        pants               bl          True"   1
+knee_high               "Sock"                      "knee_high          sock                bl          True"   1
+dress_shirt             "Shirt"                     "dress_shirt        shirt               bl          True"   1
+delicious_apple         "Apple"                     "delicious_apple    apple               bl          True"   1
+cling_peach             "Peach"                     "cling_peach        peach               bl          True"   1
+thompson_seedless       "Grapes"                    "thompson_seedless  grapes              bl          True"   1
+claw_hammer             "Hammer"                    "claw_hammer        hammer              bl          True"   1
+crosscut_saw            "Saw"                       "crosscut_saw       saw                 bl          True"   1
+phillips_screwdriver    "Screwdriver"               "phillips_screwdriver screwdriver       bl          True"   1
+accoustic_guitar        "Guitar"                    "accoustic_guitar   guitar              bl          True"   1
+grand_piano             "Piano"                     "grand_piano        piano               bl          True"   1
+bass_drum               "Drum"                      "bass_drum          drum                bl          True"   1
+windsor_chair           "Hammer"                    "windsor_chair      hammer              bl          False"  2
+floor_lamp              "Sock"                      "floor_lamp         sock                bl          False"  2
+kitchen_table           "Drum"                      "kitchen_table      drum                bl          False"  2
+sedan                   "Saw"                       "sedan              saw                 bl          False"  2
+minibus                 "Guitar"                    "minibus            guitar              bl          False"  2
+trailer_truck           "Lamp"                      "trailer_truck      lamp                bl          False"  2
+sweat_pants             "Lamp"                      "sweat_pants        lamp                bl          False"  2
+knee_high               "Saw"                       "knee_high          saw                 bl          False"  2
+dress_shirt             "Saw"                       "dress_shirt        saw                 bl          False"  2
+delicious_apple         "Shirt"                     "delicious_apple    shirt               bl          False"  2
+cling_peach             "Shirt"                     "cling_peach        shirt               bl          False"  2
+thompson_seedless       "Guitar"                    "thompson_seedless  guitar              bl          False"  2
+claw_hammer             "Sock"                      "claw_hammer        sock                bl          False"  2
+crosscut_saw            "Piano"                     "crosscut_saw       piano               bl          False"  2
+phillips_screwdriver    "Guitar"                    "phillips_screwdriver guitar            bl          False"  2
+accoustic_guitar        "Grapes"                    "accoustic_guitar   grapes              bl          False"  2
+grand_piano             "Car"                       "grand_piano        car                 bl          False"  2
+bass_drum               "Truck"                     "bass_drum          truck               bl          False"  2
+windsor_chair           "Windsor Chair"             "windsor_chair      windsor_chair       hyponym     True"   1
+floor_lamp              "Floor Lamp"                "floor_lamp         floor_lamp          hyponym     True"   1
+kitchen_table           "Kitchen Table"             "kitchen_table      kitchen_table       hyponym     True"   1
+sedan                   "Sedan"                     "sedan              sedan               hyponym     True"   1
+minibus                 "Minibus"                   "minibus            minibus             hyponym     True"   1
+trailer_truck           "Trailer Truck"             "trailer_truck      trailer_truck       hyponym     True"   1
+sweat_pants             "Sweat Pants"               "sweat_pants        sweat_pants         hyponym     True"   1
+knee_high               "Knee-High"                 "knee_high          knee_high           hyponym     True"   1
+dress_shirt             "Dress Shirt"               "dress_shirt        dress_shirt         hyponym     True"   1
+delicious_apple         "Delicious Apple"           "delicious_apple    delicious_apple     hyponym     True"   1
+cling_peach             "Cling Peach"               "cling_peach        cling_peach         hyponym     True"   1
+thompson_seedless       "Thompson Seedless"         "thompson_seedless  thompson_seedless   hyponym     True"   1
+claw_hammer             "Claw Hammer"               "claw_hammer        claw_hammer         hyponym     True"   1
+phillips_screwdriver    "Phillips Screwdriver"      "phillips_screwdriver phillips_screwdriver hyponym  True"   1 
+crosscut_saw            "Crosscut Saw"              "crosscut_saw       crosscut_saw        hyponym     True"   1
+grand_piano             "Grand Piano"               "grand_piano        grand_piano         hyponym     True"   1
+accoustic_guitar        "Accoustic Guitar"          "accoustic_guitar   accoustic_guitar    hyponym     True"   1
+bass_drum               "Bass Drum"                 "bass_drum          bass_drum           hyponym     True"   1
+windsor_chair           "Minibus"                   "windsor_chair      minibus             hyponym     False"  2
+floor_lamp              "Knee-High"                 "floor_lamp         knee_high           hyponym     False"  2
+kitchen_table           "Knee-High"                 "kitchen_table      knee_high           hyponym     False"  2
+sedan                   "Phillips Screwdriver"      "sedan              phillips_screwdriver hyponym    False"  2
+minibus                 "Cling Peach"               "minibus            cling_peach         hyponym     False"  2
+trailer_truck           "Cling Peach"               "trailer_truck      cling_peach         hyponym     False"  2
+sweat_pants             "Claw Hammer"               "sweat_pants        claw_hammer         hyponym     False"  2
+knee_high               "Bass Drum"                 "knee_high          bass_drum           hyponym     False"  2
+dress_shirt             "Phillips Screwdriver"      "dress_shirt        phillips_screwdriver hyponym    False"  2
+delicious_apple         "Bass Drum"                 "delicious_apple    bass_drum           hyponym     False"  2
+cling_peach             "Trailer Truck"             "cling_peach        trailer_truck       hyponym     False"  2
+thompson_seedless       "Bass Drum"                 "thompson_seedless  bass_drum           hyponym     False"  2
+claw_hammer             "Thompson Seedless"         "claw_hammer        thompson_seedless   hyponym     False"  2
+crosscut_saw            "Delicious Apple"           "crosscut_saw       delicious_apple     hyponym     False"  2
+phillips_screwdriver    "Windsor Chair"             "phillips_screwdriver windsor_chair     hyponym     False"  2
+accoustic_guitar        "Claw Hammer"               "accoustic_guitar   claw_hammer         hyponym     False"  2
+grand_piano             "Sedan"                     "grand_piano        sedan               hyponym     False"  2
+bass_drum               "Knee-High"                 "bass_drum          knee_high           hyponym     False"  2

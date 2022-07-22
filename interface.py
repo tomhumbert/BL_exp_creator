@@ -229,7 +229,8 @@ def main():
         elif event == "Edit":
             try:
                 index = values["table"][0]
-                project.set_last_stored_pos(index)
+                old_bl, old_index = project.get_last_stored_pos()
+                project.set_last_stored_pos(index, old_ind=old_index)
                 window, current_hypo_tree = goto_annotate(window, project)
             except:
                 sg.PopupAnnoying("Select a row first!")
@@ -242,7 +243,7 @@ def main():
             selection = elements[str(index)].split(' ')[0]
             project.add_hypo(selection)
             info = project.get_hypo_info()
-            hypo, syns, hypodef = str(info[0]),str(info[1]), str(info[2])
+            hypo, syns, hypodef = str(info[0]), str(info[1]), str(info[2])
             window['hypo'].Update(hypo)
             window['hypo_syns'].Update(syns)
             window['hypo_def'].Update(hypodef)
@@ -288,7 +289,7 @@ def main():
         elif event == 'select_img':
             img_name = project.get_hypo_info()[0] + ".png"
             img_src = sg.popup_get_file("Select the image file.","Image Selection",project.cwd, "png")
-            if len(img_src) > 0:
+            if type(img_src) != type(None):
                 img_dest = os.path.join(project.cwd, "images", img_name)
                 shutil.copy(img_src, img_dest)
                 project.add_img(img_name)

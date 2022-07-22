@@ -24,16 +24,16 @@ class BL_EXP:
         self.id = identifier
         if is_load:
             try:
-                self.df = pd.read_csv(os.path.join(cwd, self.id+".csv"))
+                self.df = pd.read_csv(os.path.join(cwd, self.id+".csv"), index_col=False)
             except:
                 raise Exception("This is not a valid project folder")
             self.cwd = cwd
-            self.last = self.get_last_stored_pos()
+            self.last, ind = self.get_last_stored_pos()
 
         elif os.path.isdir(os.path.join(cwd, self.pre+self.id)):
             self.cwd = os.path.join(cwd, self.pre+self.id)
             self.df = pd.read_csv(os.path.join(self.cwd, self.id+".csv"))
-            self.last = self.get_last_stored_pos()
+            self.last, ind = self.get_last_stored_pos()
 
         else:
             self.cwd = os.path.join(cwd, self.pre+self.id)
@@ -59,7 +59,7 @@ class BL_EXP:
         input = pd.read_csv(BLlist_filepath)
         if  self.create_new_df(input):
             self.store()
-            self.last = self.get_last_stored_pos()
+            self.last, ind = self.get_last_stored_pos()
             ret =  True
         else:
             raise Exception("The initial dataframe creation failed")
@@ -82,12 +82,12 @@ class BL_EXP:
                 "hyponym_img":empty_img_col,
                 "cont_flag":cont_col}
         try:
-            self.df = pd.DataFrame(data=cols).astype('string')
-            print(self.df)
+            self.df = pd.DataFrame(data=cols)
             self.fill_df_generic()
-            self.set_last_stored_pos(0)
         except:
             raise Exception('Dataframe creation failed.')
+        
+        self.set_last_stored_pos(0)
         return True
 
     def fill_df_generic(self):
@@ -102,7 +102,7 @@ class BL_EXP:
 
     def store(self):
         '''Takes the current dataframe and new filename and stores the dataframe in the working directory. Returns True.'''
-        self.df.to_csv(os.path.join(self.cwd, self.id+".csv"))
+        self.df.to_csv(os.path.join(self.cwd, self.id+".csv"), index=False)
         return True
 
     def get_df_as_list(self):
@@ -112,7 +112,7 @@ class BL_EXP:
     def next(self):
         last_index = self.get_bl_index(self.last)
         index = last_index+1
-        self.last = self.set_last_stored_pos(index)
+        self.set_last_stored_pos(index, old_ind=last_index)
         return self.last
 
     def get_def_info(self):
@@ -137,10 +137,18 @@ class BL_EXP:
     def get_hypo_info(self):
         index = self.get_bl_index(self.last)
         row = self.df.iloc[[index]].to_dict()
+        bl = list(row.get('bl').values())[0]
         hypo = list(row.get('hyponym').values())[0]
-        hypodef = list(row.get('hyponym_def').values())[0]
-        print(hypo)
-        syns = wn.synset(hypo).lemma_names()
+
+        if hypo != "missing":
+            hypodef = list(row.get('hyponym_def').values())[0]
+            syns = wn.synset(hypo).lemma_names()
+
+        else:
+            hypo = "missing"
+            hypodef = "missing"
+            syns = "missing"
+        
         return [hypo, syns, hypodef]
 
     def get_children(self, name):
@@ -160,20 +168,22 @@ class BL_EXP:
 
     def remove(self, bl_name):
         index = self.get_bl_index(bl_name)
-        self.set_last_stored_pos(index+1)
         self.df = self.df.drop([index])
+        self.df = self.df.reset_index(drop=True)
+        self.set_last_stored_pos(index)
         return True
 
     def get_last_stored_pos(self):
         index = self.df.index[self.df['cont_flag']==True].tolist()[0]
         self.last = self.df["bl"][index]
-        return self.last
+        return self.last, index
 
-    def set_last_stored_pos(self, ind):
-        old_i = self.get_bl_index(self.get_last_stored_pos())
-        self.df["cont_flag"][old_i] = False
-        self.df["cont_flag"][ind] = True
-        self.last = self.df["bl"][ind]
+    def set_last_stored_pos(self, new_ind, old_ind=-1):
+        if old_ind >= 0:
+            self.df["cont_flag"][old_ind] = False
+
+        self.df["cont_flag"][new_ind] = True
+        self.last = self.df["bl"][new_ind]
         return self.last
 
 #=============================================================================
